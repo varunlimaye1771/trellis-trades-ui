@@ -35,7 +35,7 @@ export function useDashboardData() {
 export function useScreener() {
   return useQuery({
     queryKey: ["screener"],
-    queryFn: api.getScreenerResults,
+    queryFn: api.getScreenerResults as () => Promise<any>,
   });
 }
 
