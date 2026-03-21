@@ -11,6 +11,24 @@ export const api = {
 
   // Dashboard
   getDashboardSummary: () => request<any>("/dashboard/summary"),
+  getPortfolioCapital: () => request<any>("/portfolio/capital"),
+  getPortfolioPerformance: () => request<any>("/portfolio/performance"),
+  getPortfolioHistory: () => request<any[]>("/portfolio/history"),
+  getScreenerRegime: () => request<any>("/screener/regime"),
+
+  // Parallel dashboard fetch
+  getDashboardData: () =>
+    Promise.all([
+      request<any>("/portfolio/capital"),
+      request<any>("/portfolio/performance"),
+      request<any[]>("/portfolio/history"),
+      request<any>("/screener/regime"),
+    ]).then(([capital, performance, history, regime]) => ({
+      capital,
+      performance,
+      history,
+      regime,
+    })),
 
   // Screener
   getScreenerResults: () => request<any[]>("/screener"),

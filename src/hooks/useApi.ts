@@ -25,6 +25,13 @@ export function useDashboardSummary() {
   });
 }
 
+export function useDashboardData() {
+  return useQuery({
+    queryKey: ["dashboard-data"],
+    queryFn: api.getDashboardData,
+  });
+}
+
 export function useScreener() {
   return useQuery({
     queryKey: ["screener"],
