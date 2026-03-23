@@ -101,6 +101,14 @@ export const api = {
   getHistory: () =>
     MOCK_MODE ? Promise.resolve(MOCK_CLOSED) : request<any[]>("/history"),
 
+  // All trades
+  getAllTrades: () =>
+    MOCK_MODE ? Promise.resolve(MOCK_ALL_TRADES) : request<any[]>("/trades/all"),
+
+  // Performance
+  getPerformance: () =>
+    MOCK_MODE ? Promise.resolve(MOCK_PERFORMANCE) : request<any>("/portfolio/performance"),
+
   // Capital
   getCapital: () =>
     MOCK_MODE
