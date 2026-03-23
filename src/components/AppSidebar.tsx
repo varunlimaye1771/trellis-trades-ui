@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Search, Briefcase, Clock, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Search, Briefcase, Clock, TrendingUp, LogOut } from "lucide-react";
+import { useClerk } from "@clerk/clerk-react";
 import { formatINR } from "@/utils/format";
 import { useCapital, useHealthCheck } from "@/hooks/useApi";
 import { cn } from "@/lib/utils";
