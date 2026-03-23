@@ -4,12 +4,13 @@
  */
 import {
   MOCK_REGIME,
+  MOCK_REGIME_CAUTIOUS,
+  MOCK_REGIME_BEAR,
   MOCK_CAPITAL,
   MOCK_PERFORMANCE,
   MOCK_HISTORY,
   MOCK_POSITIONS,
   MOCK_CLOSED,
-  MOCK_ALL_TRADES,
   MOCK_SCREENER_RESULT,
 } from "./mockData";
 
@@ -27,9 +28,83 @@ let capital: any = clone(MOCK_CAPITAL);
 let performance: any = clone(MOCK_PERFORMANCE);
 let history: any[] = clone(MOCK_HISTORY);
 
+// ── Regime mode switching (dev only) ──
+type RegimeMode = "bullish" | "cautious" | "bear";
+let currentRegimeMode: RegimeMode = "bullish";
+const regimeListeners: Set<() => void> = new Set();
+
+const REGIME_PRESETS: Record<RegimeMode, any> = {
+  bullish: MOCK_REGIME,
+  cautious: MOCK_REGIME_CAUTIOUS,
+  bear: MOCK_REGIME_BEAR,
+};
+
+// Cautious screener result: only 2 confluence suggestions
+const MOCK_SCREENER_CAUTIOUS = {
+  ...MOCK_SCREENER_RESULT,
+  cautious_mode: true,
+  suggestions: MOCK_SCREENER_RESULT.suggestions
+    .filter((s: any) => s.source === "confluence")
+    .slice(0, 2)
+    .concat(
+      // Ensure we always have 2 — duplicate with modified ticker if needed
+      MOCK_SCREENER_RESULT.suggestions.filter((s: any) => s.source === "confluence").length < 2
+        ? [{
+            ...MOCK_SCREENER_RESULT.suggestions[0],
+            ticker: "RELIANCE.NS",
+            source: "confluence",
+            s1_score: 65.3,
+            s2_score: 62.8,
+          }]
+        : []
+    )
+    .slice(0, 2),
+};
+
+// Make sure both cautious suggestions are confluence
+if (MOCK_SCREENER_CAUTIOUS.suggestions.length < 2) {
+  MOCK_SCREENER_CAUTIOUS.suggestions = [
+    {
+      ...MOCK_SCREENER_RESULT.suggestions[0],
+      source: "confluence",
+      s1_score: 71.4,
+      s2_score: 68.9,
+    },
+    {
+      ...MOCK_SCREENER_RESULT.suggestions[1],
+      ticker: "RELIANCE.NS",
+      source: "confluence",
+      entry_price: 2842.30,
+      shares: 3,
+      investment_inr: 8526.90,
+      target_price: 3268.65,
+      stoploss_price: 2728.61,
+      potential_profit: 1279.05,
+      max_loss: 341.07,
+      rr_ratio: 3.75,
+      max_hold_days: 25,
+      s1_score: 65.3,
+      s2_score: 62.8,
+    },
+  ];
+}
+
 export const mockStore = {
+  // ── Regime mode control ──
+  getRegimeMode: () => currentRegimeMode,
+
+  setRegimeMode: (mode: RegimeMode) => {
+    currentRegimeMode = mode;
+    regimeListeners.forEach((fn) => fn());
+  },
+
+  onRegimeChange: (fn: () => void) => {
+    regimeListeners.add(fn);
+    return () => { regimeListeners.delete(fn); };
+  },
+
   // ── Reads ──
-  getRegime: () => clone(MOCK_REGIME),
+  getRegime: () => clone(REGIME_PRESETS[currentRegimeMode]),
 
   getCapital: () => ({ current_capital: capital.current_capital }),
 
@@ -49,16 +124,24 @@ export const mockStore = {
     capital: clone(capital),
     performance: clone(performance),
     history: clone(history),
-    regime: clone(MOCK_REGIME),
+    regime: clone(REGIME_PRESETS[currentRegimeMode]),
   }),
 
   getDashboardSummary: () => ({
     capital: clone(capital),
     performance: clone(performance),
-    regime: clone(MOCK_REGIME),
+    regime: clone(REGIME_PRESETS[currentRegimeMode]),
   }),
 
-  getScreenerResults: () => clone(MOCK_SCREENER_RESULT),
+  getScreenerResults: () => {
+    if (currentRegimeMode === "bear") {
+      return { ...clone(MOCK_SCREENER_RESULT), skipped: true, suggestions: [] };
+    }
+    if (currentRegimeMode === "cautious") {
+      return clone(MOCK_SCREENER_CAUTIOUS);
+    }
+    return clone(MOCK_SCREENER_RESULT);
+  },
 
   // ── Mutations ──
   openPosition: (data: any) => {
