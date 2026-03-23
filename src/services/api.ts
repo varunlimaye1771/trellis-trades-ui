@@ -1,14 +1,5 @@
 import { API_BASE, MOCK_MODE } from "@/config";
-import {
-  MOCK_REGIME,
-  MOCK_CAPITAL,
-  MOCK_PERFORMANCE,
-  MOCK_HISTORY,
-  MOCK_POSITIONS,
-  MOCK_CLOSED,
-  MOCK_ALL_TRADES,
-  MOCK_SCREENER_RESULT,
-} from "./mockData";
+import { mockStore } from "./mockStore";
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -29,30 +20,25 @@ export const api = {
   // Dashboard
   getDashboardSummary: () =>
     MOCK_MODE
-      ? Promise.resolve({ capital: MOCK_CAPITAL, performance: MOCK_PERFORMANCE, regime: MOCK_REGIME })
+      ? Promise.resolve(mockStore.getDashboardSummary())
       : request<any>("/dashboard/summary"),
 
   getPortfolioCapital: () =>
-    MOCK_MODE ? Promise.resolve(MOCK_CAPITAL) : request<any>("/portfolio/capital"),
+    MOCK_MODE ? Promise.resolve(mockStore.getFullCapital()) : request<any>("/portfolio/capital"),
 
   getPortfolioPerformance: () =>
-    MOCK_MODE ? Promise.resolve(MOCK_PERFORMANCE) : request<any>("/portfolio/performance"),
+    MOCK_MODE ? Promise.resolve(mockStore.getPerformance()) : request<any>("/portfolio/performance"),
 
   getPortfolioHistory: () =>
-    MOCK_MODE ? Promise.resolve(MOCK_HISTORY) : request<any[]>("/portfolio/history"),
+    MOCK_MODE ? Promise.resolve(mockStore.getHistory()) : request<any[]>("/portfolio/history"),
 
   getScreenerRegime: () =>
-    MOCK_MODE ? Promise.resolve(MOCK_REGIME) : request<any>("/screener/regime"),
+    MOCK_MODE ? Promise.resolve(mockStore.getRegime()) : request<any>("/screener/regime"),
 
   // Parallel dashboard fetch
   getDashboardData: () =>
     MOCK_MODE
-      ? Promise.resolve({
-          capital: MOCK_CAPITAL,
-          performance: MOCK_PERFORMANCE,
-          history: MOCK_HISTORY,
-          regime: MOCK_REGIME,
-        })
+      ? Promise.resolve(mockStore.getDashboardData())
       : Promise.all([
           request<any>("/portfolio/capital"),
           request<any>("/portfolio/performance"),
@@ -68,21 +54,21 @@ export const api = {
   // Screener
   getScreenerResults: () =>
     MOCK_MODE
-      ? delay(3000).then(() => MOCK_SCREENER_RESULT)
+      ? delay(3000).then(() => mockStore.getScreenerResults())
       : request<any[]>("/screener"),
 
   runScreener: () =>
     MOCK_MODE
-      ? delay(3000).then(() => MOCK_SCREENER_RESULT)
+      ? delay(3000).then(() => mockStore.getScreenerResults())
       : request<any>("/screener/run", { method: "POST" }),
 
   // Positions
   getPositions: () =>
-    MOCK_MODE ? Promise.resolve(MOCK_POSITIONS) : request<any[]>("/trades/open"),
+    MOCK_MODE ? Promise.resolve(mockStore.getOpenTrades()) : request<any[]>("/trades/open"),
 
   closePosition: (id: string | number, data: { exit_price: number; exit_reason: string; exit_date: string }) =>
     MOCK_MODE
-      ? Promise.resolve({ id, ...data, status: "closed" })
+      ? Promise.resolve(mockStore.closePosition(id, data))
       : request<any>(`/trades/close/${id}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -91,7 +77,7 @@ export const api = {
 
   openPosition: (data: any) =>
     MOCK_MODE
-      ? Promise.resolve({ id: Date.now(), ...data, status: "open" })
+      ? Promise.resolve(mockStore.openPosition(data))
       : request<any>("/positions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -100,19 +86,19 @@ export const api = {
 
   // History
   getHistory: () =>
-    MOCK_MODE ? Promise.resolve(MOCK_CLOSED) : request<any[]>("/history"),
+    MOCK_MODE ? Promise.resolve(mockStore.getClosedTrades()) : request<any[]>("/history"),
 
   // All trades
   getAllTrades: () =>
-    MOCK_MODE ? Promise.resolve(MOCK_ALL_TRADES) : request<any[]>("/trades/all"),
+    MOCK_MODE ? Promise.resolve(mockStore.getAllTrades()) : request<any[]>("/trades/all"),
 
   // Performance
   getPerformance: () =>
-    MOCK_MODE ? Promise.resolve(MOCK_PERFORMANCE) : request<any>("/portfolio/performance"),
+    MOCK_MODE ? Promise.resolve(mockStore.getPerformance()) : request<any>("/portfolio/performance"),
 
   // Capital
   getCapital: () =>
     MOCK_MODE
-      ? Promise.resolve({ current_capital: MOCK_CAPITAL.current_capital })
+      ? Promise.resolve(mockStore.getCapital())
       : request<{ current_capital: number }>("/capital"),
 };
