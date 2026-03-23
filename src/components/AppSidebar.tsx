@@ -15,6 +15,7 @@ const navItems = [
 export function AppSidebar() {
   const { data: capitalData } = useCapital();
   const { data: health, isError: healthError } = useHealthCheck();
+  const { signOut } = useClerk();
 
   const isOnline = !!health && !healthError;
 
