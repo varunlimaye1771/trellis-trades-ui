@@ -6,6 +6,7 @@ import {
   MOCK_HISTORY,
   MOCK_POSITIONS,
   MOCK_CLOSED,
+  MOCK_ALL_TRADES,
   MOCK_SCREENER_RESULT,
 } from "./mockData";
 
