@@ -64,11 +64,16 @@ export const api = {
           regime,
         })),
 
-  // Screener (3s delay in mock mode)
+  // Screener
   getScreenerResults: () =>
     MOCK_MODE
       ? delay(3000).then(() => MOCK_SCREENER_RESULT)
       : request<any[]>("/screener"),
+
+  runScreener: () =>
+    MOCK_MODE
+      ? delay(3000).then(() => MOCK_SCREENER_RESULT)
+      : request<any>("/screener/run", { method: "POST" }),
 
   // Positions
   getPositions: () =>

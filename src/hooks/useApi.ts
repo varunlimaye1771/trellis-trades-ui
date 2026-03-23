@@ -39,6 +39,23 @@ export function useScreener() {
   });
 }
 
+export function useRegime() {
+  return useQuery({
+    queryKey: ["regime"],
+    queryFn: api.getScreenerRegime,
+  });
+}
+
+export function useRunScreener() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.runScreener(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["screener"] });
+    },
+  });
+}
+
 export function usePositions() {
   return useQuery({
     queryKey: ["positions"],
