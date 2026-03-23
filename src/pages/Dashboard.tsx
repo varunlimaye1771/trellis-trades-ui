@@ -75,10 +75,10 @@ function MetricCards({
             totalReturnPositive ? "text-profit" : "text-loss"
           )}
         >
-          {formatPct(performance.total_return_pct ?? 0)}
+          {formatPct(capital.total_return_pct ?? 0)}
         </p>
         <p className="text-xs text-muted-foreground mt-1">
-          from {formatINR(performance.initial_capital ?? 0)}
+          from {formatINR(capital.initial_capital ?? 0)}
         </p>
       </div>
 

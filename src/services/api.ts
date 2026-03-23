@@ -78,7 +78,7 @@ export const api = {
   openPosition: (data: any) =>
     MOCK_MODE
       ? Promise.resolve(mockStore.openPosition(data))
-      : request<any>("/positions", {
+      : request<any>("/trades/open", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
