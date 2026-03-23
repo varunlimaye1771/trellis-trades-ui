@@ -73,13 +73,14 @@ export function useHistory() {
 export function useClosePosition() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, exitPrice }: { id: string; exitPrice: number }) =>
-      api.closePosition(id, exitPrice),
+    mutationFn: ({ id, exit_price, exit_reason, exit_date }: { id: string | number; exit_price: number; exit_reason: string; exit_date: string }) =>
+      api.closePosition(id, { exit_price, exit_reason, exit_date }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["positions"] });
       qc.invalidateQueries({ queryKey: ["capital"] });
       qc.invalidateQueries({ queryKey: ["history"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-data"] });
     },
   });
 }

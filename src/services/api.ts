@@ -77,15 +77,15 @@ export const api = {
 
   // Positions
   getPositions: () =>
-    MOCK_MODE ? Promise.resolve(MOCK_POSITIONS) : request<any[]>("/positions"),
+    MOCK_MODE ? Promise.resolve(MOCK_POSITIONS) : request<any[]>("/trades/open"),
 
-  closePosition: (id: string, exitPrice: number) =>
+  closePosition: (id: string | number, data: { exit_price: number; exit_reason: string; exit_date: string }) =>
     MOCK_MODE
-      ? Promise.resolve({ id, exit_price: exitPrice, status: "closed" })
-      : request<any>(`/positions/${id}/close`, {
+      ? Promise.resolve({ id, ...data, status: "closed" })
+      : request<any>(`/trades/close/${id}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ exit_price: exitPrice }),
+          body: JSON.stringify(data),
         }),
 
   openPosition: (data: any) =>
