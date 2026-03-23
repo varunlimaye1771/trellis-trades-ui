@@ -16,6 +16,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster position="top-right" />
+      <DevRegimeToggle />
       <BrowserRouter>
         <AppLayout>
           <Routes>
