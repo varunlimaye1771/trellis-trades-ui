@@ -53,7 +53,7 @@ function MetricCards({
   capital: any;
   performance: any;
 }) {
-  const totalReturnPositive = (performance.total_return_pct ?? 0) >= 0;
+  const totalReturnPositive = (capital.total_return_pct ?? 0) >= 0;
   const expectancyPositive = (performance.expectancy_inr ?? 0) >= 0;
 
   return (
