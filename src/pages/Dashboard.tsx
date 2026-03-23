@@ -53,7 +53,7 @@ function MetricCards({
   capital: any;
   performance: any;
 }) {
-  const totalReturnPositive = (performance.total_return_pct ?? 0) >= 0;
+  const totalReturnPositive = (capital.total_return_pct ?? 0) >= 0;
   const expectancyPositive = (performance.expectancy_inr ?? 0) >= 0;
 
   return (
@@ -75,10 +75,10 @@ function MetricCards({
             totalReturnPositive ? "text-profit" : "text-loss"
           )}
         >
-          {formatPct(performance.total_return_pct ?? 0)}
+          {formatPct(capital.total_return_pct ?? 0)}
         </p>
         <p className="text-xs text-muted-foreground mt-1">
-          from {formatINR(performance.initial_capital ?? 0)}
+          from {formatINR(capital.initial_capital ?? 0)}
         </p>
       </div>
 

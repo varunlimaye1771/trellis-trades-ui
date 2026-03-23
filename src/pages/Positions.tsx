@@ -188,7 +188,7 @@ export default function Positions() {
               <>
                 {" "}· Available capital:{" "}
                 <span className="font-medium text-[hsl(var(--profit))] tabular-nums">
-                  {formatINR(capitalData.current_capital)}
+                  {formatINR(capitalData.available_capital ?? (capitalData.current_capital - totalInvested))}
                 </span>
               </>
             )}

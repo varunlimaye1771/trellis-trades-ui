@@ -13,7 +13,7 @@ export function useHealthCheck() {
 export function useCapital() {
   return useQuery({
     queryKey: ["capital"],
-    queryFn: api.getCapital,
+    queryFn: api.getPortfolioCapital,
     refetchInterval: 60000,
   });
 }
