@@ -6,6 +6,7 @@ import {
   MOCK_HISTORY,
   MOCK_POSITIONS,
   MOCK_CLOSED,
+  MOCK_ALL_TRADES,
   MOCK_SCREENER_RESULT,
 } from "./mockData";
 
@@ -100,6 +101,14 @@ export const api = {
   // History
   getHistory: () =>
     MOCK_MODE ? Promise.resolve(MOCK_CLOSED) : request<any[]>("/history"),
+
+  // All trades
+  getAllTrades: () =>
+    MOCK_MODE ? Promise.resolve(MOCK_ALL_TRADES) : request<any[]>("/trades/all"),
+
+  // Performance
+  getPerformance: () =>
+    MOCK_MODE ? Promise.resolve(MOCK_PERFORMANCE) : request<any>("/portfolio/performance"),
 
   // Capital
   getCapital: () =>

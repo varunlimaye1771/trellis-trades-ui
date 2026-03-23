@@ -70,6 +70,20 @@ export function useHistory() {
   });
 }
 
+export function useAllTrades() {
+  return useQuery({
+    queryKey: ["all-trades"],
+    queryFn: api.getAllTrades,
+  });
+}
+
+export function usePerformance() {
+  return useQuery({
+    queryKey: ["performance"],
+    queryFn: api.getPerformance,
+  });
+}
+
 export function useClosePosition() {
   const qc = useQueryClient();
   return useMutation({
