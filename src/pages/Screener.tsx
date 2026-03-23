@@ -23,7 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { AlertTriangle, Loader2, Search } from "lucide-react";
+import { AlertTriangle, Loader2, Search, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
 
 function stripNS(ticker: string) {
@@ -32,16 +32,28 @@ function stripNS(ticker: string) {
 
 function sourceBadge(source: string) {
   if (source === "confluence")
-    return <Badge className="bg-[hsl(var(--profit))]/15 text-[hsl(var(--profit))] border-0 hover:bg-[hsl(var(--profit))]/20">CONFLUENCE</Badge>;
+    return <Badge className="bg-profit/15 text-profit border-0 hover:bg-profit/20">CONFLUENCE</Badge>;
   if (source === "S1_only")
-    return <Badge className="bg-[hsl(var(--info))]/15 text-[hsl(var(--info))] border-0 hover:bg-[hsl(var(--info))]/20">S1 Only</Badge>;
+    return <Badge className="bg-info/15 text-info border-0 hover:bg-info/20">S1 Only</Badge>;
   return <Badge className="bg-purple-500/15 text-purple-400 border-0 hover:bg-purple-500/20">S2 Only</Badge>;
 }
 
 function rrColor(rr: number) {
-  if (rr >= 2) return "text-[hsl(var(--profit))]";
-  if (rr >= 1.5) return "text-[hsl(var(--warning))]";
-  return "text-[hsl(var(--loss))]";
+  if (rr >= 2) return "text-profit";
+  if (rr >= 1.5) return "text-warning";
+  return "text-loss";
+}
+
+function regimeMode(regime: any): "bullish" | "cautious" | "bear" {
+  return regime.regime_mode ?? (regime.is_bullish ? "bullish" : "bear");
+}
+
+function regimeBadge(mode: "bullish" | "cautious" | "bear") {
+  if (mode === "bullish")
+    return <Badge className="bg-profit/15 text-profit border-0">Bullish</Badge>;
+  if (mode === "cautious")
+    return <Badge className="bg-warning/15 text-warning border-0">Cautious</Badge>;
+  return <Badge className="bg-loss/15 text-loss border-0">Bear</Badge>;
 }
 
 export default function Screener() {
@@ -90,7 +102,7 @@ export default function Screener() {
     }
   }, [confirmTrade, openPosition]);
 
-  const isBullish = regime?.is_bullish;
+  const mode = regime ? regimeMode(regime) : null;
 
   return (
     <div className="space-y-6">
@@ -111,16 +123,7 @@ export default function Screener() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Market Regime</CardTitle>
-              <Badge
-                className={cn(
-                  "border-0",
-                  isBullish
-                    ? "bg-[hsl(var(--profit))]/15 text-[hsl(var(--profit))]"
-                    : "bg-[hsl(var(--loss))]/15 text-[hsl(var(--loss))]"
-                )}
-              >
-                {isBullish ? "Bullish" : "Bearish"}
-              </Badge>
+              {regimeBadge(mode!)}
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -133,17 +136,35 @@ export default function Screener() {
                 <span className="text-muted-foreground">50 EMA</span>
                 <p className="font-semibold tabular-nums">{formatINR(regime.ema50)}</p>
               </div>
+              <div>
+                <span className="text-muted-foreground">200 EMA</span>
+                <p className="font-semibold tabular-nums">{formatINR(regime.ema200)}</p>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">{regime.message}</p>
 
-            {!isBullish && (
-              <div className="flex items-start gap-2 rounded-md bg-[hsl(var(--warning))]/10 p-3 text-sm text-[hsl(var(--warning))]">
+            {mode === "bullish" && (
+              <p className="text-sm text-profit font-medium">Screener active this week</p>
+            )}
+
+            {mode === "cautious" && (
+              <div className="flex items-start gap-2 rounded-md bg-warning/10 p-3 text-sm text-warning">
                 <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                 <span>
-                  The market is currently in a bearish regime. The algorithm recommends skipping this week, but you may still run the screener.
+                  Cautious regime. Running with reduced risk: max 2 trades, confluence signals only, tighter stop losses.
                 </span>
               </div>
             )}
+
+            {mode === "bear" && (
+              <div className="flex items-start gap-2 rounded-md bg-loss/10 p-3 text-sm text-loss">
+                <ShieldOff className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>
+                  Bear market confirmed. The screener has been skipped. Consider holding cash until the market recovers above the 200 EMA.
+                </span>
+              </div>
+            )}
+
+            <p className="text-sm text-muted-foreground">{regime.message}</p>
           </CardContent>
         </Card>
       )}
@@ -151,29 +172,47 @@ export default function Screener() {
       {/* SECTION 2: RUN SCREENER BUTTON */}
       {regime && !isRunning && !screenerResults && (
         <div className="flex justify-center">
-          {isBullish ? (
+          {mode === "bullish" && (
             <Button
               onClick={runScreener}
               size="lg"
-              className="bg-[hsl(var(--profit))] hover:bg-[hsl(var(--profit))]/90 text-white px-8 active:scale-[0.97] transition-transform"
+              className="bg-profit hover:bg-profit/90 text-white px-8 active:scale-[0.97] transition-transform"
             >
               <Search className="h-4 w-4 mr-2" />
               Run Screener
             </Button>
-          ) : (
+          )}
+          {mode === "cautious" && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     onClick={runScreener}
                     size="lg"
-                    className="bg-[hsl(var(--warning))] hover:bg-[hsl(var(--warning))]/90 text-white px-8 active:scale-[0.97] transition-transform"
+                    className="bg-warning hover:bg-warning/90 text-white px-8 active:scale-[0.97] transition-transform"
                   >
                     <AlertTriangle className="h-4 w-4 mr-2" />
                     Run Screener
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Bearish regime — proceed with caution.</TooltipContent>
+                <TooltipContent>Cautious regime — reduced risk parameters applied.</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {mode === "bear" && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="lg"
+                    disabled
+                    className="bg-muted text-muted-foreground px-8"
+                  >
+                    <ShieldOff className="h-4 w-4 mr-2" />
+                    Run Screener
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Bear market — screener skipped automatically</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
@@ -200,7 +239,7 @@ export default function Screener() {
 
       {/* SKIPPED STATE */}
       {screenerResults?.skipped && (
-        <div className="flex items-start gap-2 rounded-lg border border-[hsl(var(--warning))]/30 bg-[hsl(var(--warning))]/10 p-4 text-sm text-[hsl(var(--warning))]">
+        <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm text-warning">
           <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
             Screener skipped — bearish market regime. No suggestions generated this week.
@@ -211,6 +250,16 @@ export default function Screener() {
       {/* RESULTS */}
       {screenerResults && !screenerResults.skipped && (
         <>
+          {/* CAUTIOUS MODE BANNER */}
+          {screenerResults.cautious_mode && (
+            <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm text-warning">
+              <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>
+                Cautious mode active — showing top 2 confluence signals only with tighter risk parameters.
+              </span>
+            </div>
+          )}
+
           {/* META LINE */}
           <p className="text-xs text-muted-foreground">
             Screened {screenerResults.screened_stocks} stocks · S1 signals: {screenerResults.s1_count} · S2 signals: {screenerResults.s2_count} · Confluence: {screenerResults.confluence_count} · Run at: {screenerResults.run_at}
@@ -234,7 +283,6 @@ export default function Screener() {
                     </div>
                   </CardHeader>
                   <CardContent className="flex-1 space-y-4">
-                    {/* Trade Levels */}
                     <div className="rounded-md bg-muted/50 p-3 space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Entry</span>
@@ -244,14 +292,14 @@ export default function Screener() {
                         <span className="text-muted-foreground">Target</span>
                         <span className="tabular-nums">
                           {formatINR(s.target_price)}{" "}
-                          <span className="text-[hsl(var(--profit))]">{formatPct(upside)}</span>
+                          <span className="text-profit">{formatPct(upside)}</span>
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Stop Loss</span>
                         <span className="tabular-nums">
                           {formatINR(s.stoploss_price)}{" "}
-                          <span className="text-[hsl(var(--loss))]">{formatPct(downside)}</span>
+                          <span className="text-loss">{formatPct(downside)}</span>
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -262,7 +310,6 @@ export default function Screener() {
                       </div>
                     </div>
 
-                    {/* Position Sizing */}
                     <div className="space-y-1.5 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Shares</span>
@@ -274,11 +321,11 @@ export default function Screener() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Potential Profit</span>
-                        <span className="tabular-nums text-[hsl(var(--profit))]">{formatINR(s.potential_profit)}</span>
+                        <span className="tabular-nums text-profit">{formatINR(s.potential_profit)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Max Loss</span>
-                        <span className="tabular-nums text-[hsl(var(--loss))]">{formatINR(s.max_loss)}</span>
+                        <span className="tabular-nums text-loss">{formatINR(s.max_loss)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Max Hold</span>
@@ -286,7 +333,6 @@ export default function Screener() {
                       </div>
                     </div>
 
-                    {/* Signal Scores */}
                     {(s.s1_score != null || s.s2_score != null) && (
                       <p className="text-xs text-muted-foreground">
                         {s.s1_score != null && `S1: ${s.s1_score}`}
@@ -295,7 +341,6 @@ export default function Screener() {
                       </p>
                     )}
 
-                    {/* Place Trade Button */}
                     <Button
                       onClick={() => setConfirmTrade(s)}
                       disabled={isRecorded}
@@ -303,7 +348,7 @@ export default function Screener() {
                         "w-full active:scale-[0.97] transition-transform",
                         isRecorded
                           ? "bg-muted text-muted-foreground hover:bg-muted"
-                          : "bg-[hsl(var(--profit))] hover:bg-[hsl(var(--profit))]/90 text-white"
+                          : "bg-profit hover:bg-profit/90 text-white"
                       )}
                     >
                       {isRecorded ? "Trade Recorded" : "Place Trade"}
@@ -356,7 +401,7 @@ export default function Screener() {
             <Button
               onClick={handleConfirmTrade}
               disabled={openPosition.isPending}
-              className="bg-[hsl(var(--profit))] hover:bg-[hsl(var(--profit))]/90 text-white active:scale-[0.97] transition-transform"
+              className="bg-profit hover:bg-profit/90 text-white active:scale-[0.97] transition-transform"
             >
               {openPosition.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
