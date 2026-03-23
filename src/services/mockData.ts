@@ -157,11 +157,14 @@ export const MOCK_CLOSED = MOCK_CLOSED_TRADES;
 
 export const MOCK_SCREENER_RESULT = {
   regime: {
+    regime_mode: "bullish" as "bullish" | "cautious" | "bear",
     is_bullish: true,
     nifty_close: 24312.45,
     ema50: 23891.20,
+    ema200: 22150.00,
     message: "Bullish regime — screener active this week",
   },
+  cautious_mode: false,
   suggestions: [
     {
       ticker: "BAJFINANCE.NS",
