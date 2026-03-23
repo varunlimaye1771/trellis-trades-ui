@@ -25,21 +25,49 @@ function abbreviateINR(value: number): string {
 /* ── Section 1: Regime Banner ── */
 
 function RegimeBanner({ regime }: { regime: any }) {
-  const bull = regime.is_bullish;
+  const mode = regime.regime_mode ?? (regime.is_bullish ? "bullish" : "bear");
+
+  const config = {
+    bullish: {
+      bg: "bg-[#f0fdf4]",
+      border: "border-l-profit",
+      dot: "bg-profit",
+      textColor: "text-profit",
+      text: `Bullish Regime — Nifty at ${formatINR(regime.nifty_close)} above 50 EMA (${formatINR(regime.ema50)}) · Screener active · 3 trades`,
+    },
+    cautious: {
+      bg: "bg-[#fffbeb]",
+      border: "border-l-warning",
+      dot: "bg-warning",
+      textColor: "text-warning",
+      text: `Cautious Regime — Nifty at ${formatINR(regime.nifty_close)} below 50 EMA (${formatINR(regime.ema50)}) but above 200 EMA (${formatINR(regime.ema200)}) · 2 confluence-only trades`,
+    },
+    bear: {
+      bg: "bg-[#fef2f2]",
+      border: "border-l-loss",
+      dot: "bg-loss",
+      textColor: "text-loss",
+      text: `Bear Market — Nifty at ${formatINR(regime.nifty_close)} below 200 EMA (${formatINR(regime.ema200)}) · Screener skipped · Hold cash`,
+    },
+  }[mode] ?? {
+    bg: "bg-muted",
+    border: "border-l-muted-foreground",
+    dot: "bg-muted-foreground",
+    textColor: "text-muted-foreground",
+    text: regime.message,
+  };
+
   return (
     <div
       className={cn(
-        "rounded-md px-4 py-3 text-sm font-medium border-l-[3px] animate-fade-in",
-        bull
-          ? "bg-profit/15 border-l-profit text-profit"
-          : "bg-loss/15 border-l-loss text-loss"
+        "rounded-md px-4 py-3 text-sm font-medium border-l-[3px] animate-fade-in flex items-center gap-2",
+        config.bg,
+        config.border,
+        config.textColor
       )}
     >
-      {bull ? "Bullish" : "Bearish"} Regime — Nifty at{" "}
-      {formatINR(regime.nifty_close)} · 50 EMA at {formatINR(regime.ema50)} ·{" "}
-      {bull
-        ? "Screener active this week"
-        : "Consider skipping this week"}
+      <span className={cn("inline-block h-2 w-2 rounded-full shrink-0", config.dot)} />
+      {config.text}
     </div>
   );
 }
