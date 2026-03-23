@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/AppLayout";
+import { DevRegimeToggle } from "@/components/DevRegimeToggle";
 import Dashboard from "@/pages/Dashboard";
 import Screener from "@/pages/Screener";
 import Positions from "@/pages/Positions";
