@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Search, Briefcase, Clock, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Search, Briefcase, Clock, TrendingUp, LogOut } from "lucide-react";
+import { useClerk } from "@clerk/clerk-react";
 import { formatINR } from "@/utils/format";
 import { useCapital, useHealthCheck } from "@/hooks/useApi";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ const navItems = [
 export function AppSidebar() {
   const { data: capitalData } = useCapital();
   const { data: health, isError: healthError } = useHealthCheck();
+  const { signOut } = useClerk();
 
   const isOnline = !!health && !healthError;
 
@@ -72,6 +74,13 @@ export function AppSidebar() {
             {isOnline ? "API Online" : "API Offline"}
           </span>
         </div>
+        <button
+          onClick={() => signOut()}
+          className="flex items-center gap-2 px-1 pt-1 text-xs text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
+        >
+          <LogOut className="h-3.5 w-3.5" />
+          Sign out
+        </button>
       </div>
     </aside>
   );
