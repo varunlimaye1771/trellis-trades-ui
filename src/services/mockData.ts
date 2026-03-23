@@ -1,8 +1,28 @@
 export const MOCK_REGIME = {
+  regime_mode: "bullish" as "bullish" | "cautious" | "bear",
   is_bullish: true,
   nifty_close: 24312.45,
   ema50: 23891.20,
+  ema200: 22150.00,
   message: "Bullish regime — screener active this week",
+};
+
+export const MOCK_REGIME_CAUTIOUS = {
+  regime_mode: "cautious" as "bullish" | "cautious" | "bear",
+  is_bullish: false,
+  nifty_close: 23450.00,
+  ema50: 24100.00,
+  ema200: 22800.00,
+  message: "Cautious regime — Nifty below 50 EMA but above 200 EMA. Running with reduced risk parameters.",
+};
+
+export const MOCK_REGIME_BEAR = {
+  regime_mode: "bear" as "bullish" | "cautious" | "bear",
+  is_bullish: false,
+  nifty_close: 21500.00,
+  ema50: 23200.00,
+  ema200: 22800.00,
+  message: "Bear market — Nifty below 200 EMA. Screener skipped. Hold cash.",
 };
 
 export const MOCK_CAPITAL = {
